@@ -4,6 +4,8 @@ import com.brentvatne.react.ReactVideoView.Events;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.SimpleViewManager;
@@ -35,6 +37,8 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     public static final String PROP_CONTROLS = "controls";
     public static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
+    
+    public static final int COMMAND_GET_CURRENT_POSITION = 1;
 
     @Override
     public String getName() {
@@ -149,4 +153,21 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
         videoView.setProgressUpdateInterval(interval);
     }
     
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        return MapBuilder.of(
+            "getCurrentPosition", COMMAND_GET_CURRENT_POSITION
+                             );
+    }
+    
+    @Override
+    public void receiveCommand(ReactVideoView videoView, int commandType, @Nullable ReadableArray args) {
+        switch(commandType) {
+            case COMMAND_GET_CURRENT_POSITION: {
+                videoView.triggerGetCurrentPosition();
+                return;
+                
+            }
+        }
+    }
 }

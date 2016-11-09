@@ -36,7 +36,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         EVENT_END("onVideoEnd"),
         EVENT_STALLED("onPlaybackStalled"),
         EVENT_RESUME("onPlaybackResume"),
-        EVENT_READY_FOR_DISPLAY("onReadyForDisplay");
+        EVENT_READY_FOR_DISPLAY("onReadyForDisplay"),
+        EVENT_GET_POSITION_TRIGGERED("onGetPositionRequested");
 
         private final String mName;
 
@@ -119,7 +120,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                 if (mMediaPlayerValid && !isCompleted &&!mPaused) {
                     WritableMap event = Arguments.createMap();
-                    Log.i("ReactVideoView", String.valueOf(mMediaPlayer.getCurrentPosition() / 1000.0));
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
@@ -340,6 +340,15 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     
             public void setProgressUpdateInterval(final int update) {
                 updateInterval = update;
+            }
+            
+            public void triggerGetCurrentPosition() {
+                int currentPosition = mMediaPlayer.getCurrentPosition();
+                
+                WritableMap event = Arguments.createMap();
+                event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
+                event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
+                mEventEmitter.receiveEvent(getId(), Events.EVENT_GET_POSITION_TRIGGERED.toString(), event);
             }
 
     public void applyModifiers() {

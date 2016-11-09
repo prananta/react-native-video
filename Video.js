@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from 'react';
-import {StyleSheet, requireNativeComponent, NativeModules, View} from 'react-native';
+import ReactNative, {StyleSheet, requireNativeComponent, NativeModules, View, UIManager} from 'react-native';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 import VideoResizeMode from './VideoResizeMode.js';
 
@@ -54,6 +54,12 @@ export default class Video extends Component {
       this.props.onProgress(event.nativeEvent);
     }
   };
+
+  _onGetPositionRequested = (event) => {
+    if (this.props.onGetPositionRequested) {
+      this.props.onGetPositionRequested(event.nativeEvent)
+    }
+  }
 
   _onSeek = (event) => {
     if (this.props.onSeek) {
@@ -115,6 +121,14 @@ export default class Video extends Component {
     }
   };
 
+  requestCurrentPosition() {
+    UIManager.dispatchViewManagerCommand(
+      ReactNative.findNodeHandle(this),
+      UIManager.RCTVideo.Commands.getCurrentPosition,
+      []
+    )
+  }
+
   render() {
     const resizeMode = this.props.resizeMode;
     const source = resolveAssetSource(this.props.source) || {};
@@ -164,6 +178,7 @@ export default class Video extends Component {
       onPlaybackStalled: this._onPlaybackStalled,
       onPlaybackResume: this._onPlaybackResume,
       onPlaybackRateChange: this._onPlaybackRateChange,
+      onGetPositionRequested: this._onGetPositionRequested
     });
 
     return (
@@ -214,6 +229,7 @@ Video.propTypes = {
   onPlaybackStalled: PropTypes.func,
   onPlaybackResume: PropTypes.func,
   onPlaybackRateChange: PropTypes.func,
+  onGetPositionRequested: PropTypes.func,
 
   /* Required by react-native */
   scaleX: PropTypes.number,
