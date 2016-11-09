@@ -34,6 +34,7 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public static final String PROP_RATE = "rate";
     public static final String PROP_PLAY_IN_BACKGROUND = "playInBackground";
     public static final String PROP_CONTROLS = "controls";
+    public static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
 
     @Override
     public String getName() {
@@ -142,4 +143,10 @@ public class ReactVideoViewManager extends SimpleViewManager<ReactVideoView> {
     public void setControls(final ReactVideoView videoView, final boolean controls) {
         videoView.setControls(controls);
     }
+    
+    @ReactProp(name = PROP_PROGRESS_UPDATE_INTERVAL)
+    public void setProgressUpdateInterval(final ReactVideoView videoView, final int interval) {
+        videoView.setProgressUpdateInterval(interval);
+    }
+    
 }

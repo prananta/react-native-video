@@ -91,6 +91,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     private float mRate = 1.0f;
     private boolean mPlayInBackground = false;
     private boolean mActiveStatePauseStatus = false;
+            private int updateInterval = 250;
 
     private int mMainVer = 0;
     private int mPatchVer = 0;
@@ -118,13 +119,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                 if (mMediaPlayerValid && !isCompleted &&!mPaused) {
                     WritableMap event = Arguments.createMap();
+                    Log.i("ReactVideoView", String.valueOf(mMediaPlayer.getCurrentPosition() / 1000.0));
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     // Check for update after an interval
                     // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
-                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, 250);
+                    mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, updateInterval);
                 }
             }
         };
@@ -335,6 +337,10 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android");
         }
     }
+    
+            public void setProgressUpdateInterval(final int update) {
+                updateInterval = update;
+            }
 
     public void applyModifiers() {
         setResizeModeModifier(mResizeMode);
