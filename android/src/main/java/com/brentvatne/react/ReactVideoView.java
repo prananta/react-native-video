@@ -124,8 +124,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                     event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
-                    // Check for update after an interval
-                    // TODO: The update interval is fixed at 250. There is a property in React component that defines this value. Totally ignored !!!
                     mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, updateInterval);
                 }
             }
@@ -337,14 +335,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             Log.e(ReactVideoViewManager.REACT_CLASS, "Setting playback rate is not yet supported on Android");
         }
     }
-    
+
             public void setProgressUpdateInterval(final int update) {
                 updateInterval = update;
             }
-            
+
             public void triggerGetCurrentPosition() {
                 int currentPosition = mMediaPlayer.getCurrentPosition();
-                
+
                 WritableMap event = Arguments.createMap();
                 event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
                 event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
@@ -462,6 +460,8 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             if (isCompleted && mVideoDuration != 0 && msec < mVideoDuration) {
                 isCompleted = false;
             }
+            start();
+            mProgressUpdateHandler.post(mProgressUpdateRunnable);
         }
     }
 
