@@ -121,7 +121,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 if (mMediaPlayerValid && !isCompleted &&!mPaused) {
                     WritableMap event = Arguments.createMap();
                     event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
-                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
+                    event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); //TODO:mBufferUpdateRunnable
                     mEventEmitter.receiveEvent(getId(), Events.EVENT_PROGRESS.toString(), event);
 
                     mProgressUpdateHandler.postDelayed(mProgressUpdateRunnable, updateInterval);
@@ -211,25 +211,30 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                 setDataSource(mThemedReactContext, parsedUrl, headers);
             } else if (isAsset) {
-                if (uriString.startsWith("content://")) {
-                    Uri parsedUrl = Uri.parse(uriString);
-                    setDataSource(mThemedReactContext, parsedUrl);
-                } else {
-                    setDataSource(uriString);
-                }
-            } else {
-                ZipResourceFile expansionFile= null;
                 AssetFileDescriptor fd= null;
-                if(mMainVer>0) {
-                    try {
-                        expansionFile = APKExpansionSupport.getAPKExpansionZipFile(mThemedReactContext, mMainVer, mPatchVer);
-                        fd = expansionFile.getAssetFileDescriptor(uriString);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
+                if(mMainVer>0) { // load from expansion file
+                  ZipResourceFile expansionFile= null;
+                  try {
+                      expansionFile = APKExpansionSupport.getAPKExpansionZipFile(mThemedReactContext, mMainVer, mPatchVer);
+                      fd = expansionFile.getAssetFileDescriptor(uriString);
+                  } catch (IOException e) {
+                      e.printStackTrace();
+                  } catch (NullPointerException e) {
+                      e.printStackTrace();
+                  }
+                } else { // load from assets
+                    if (uriString.startsWith("content://")) {
+                        Uri parsedUrl = Uri.parse(uriString);
+                        setDataSource(mThemedReactContext, parsedUrl);
+                    } else {
+                      int id = mThemedReactContext.getResources().getIdentifier(
+                              uriString,
+                              "drawable",
+                              mThemedReactContext.getPackageName());
+                      fd = mThemedReactContext.getResources().openRawResourceFd(id);
                     }
                 }
+
                 if(fd==null) {
                     setRawData(mThemedReactContext.getResources().getIdentifier(
                             uriString,
@@ -345,7 +350,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
                 WritableMap event = Arguments.createMap();
                 event.putDouble(EVENT_PROP_CURRENT_TIME, mMediaPlayer.getCurrentPosition() / 1000.0);
-                event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoBufferedDuration / 1000.0); //TODO:mBufferUpdateRunnable
+                event.putDouble(EVENT_PROP_PLAYABLE_DURATION, mVideoDuration / 1000.0); //TODO:mBufferUpdateRunnable
                 mEventEmitter.receiveEvent(getId(), Events.EVENT_GET_POSITION_TRIGGERED.toString(), event);
             }
 
