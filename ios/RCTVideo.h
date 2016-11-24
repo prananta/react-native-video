@@ -13,4 +13,6 @@
 
 - (AVPlayerViewController*)createPlayerViewController:(AVPlayer*)player withPlayerItem:(AVPlayerItem*)playerItem;
 
+- (void)triggerGetCurrentPosition;
+
 @end

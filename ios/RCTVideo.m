@@ -184,6 +184,11 @@ static NSString *const playbackRate = @"rate";
    CMTime currentTime = _player.currentTime;
    const Float64 duration = CMTimeGetSeconds(playerDuration);
    const Float64 currentTimeSecs = CMTimeGetSeconds(currentTime);
+    
+    if (currentTimeSecs > duration) {
+        return;
+    }
+    
    if( currentTimeSecs >= 0) {
         [_eventDispatcher sendInputEventWithName:@"onVideoProgress"
                                             body:@{
@@ -651,6 +656,23 @@ static NSString *const playbackRate = @"rate";
     [_playerLayer removeFromSuperlayer];
     [_playerLayer removeObserver:self forKeyPath:readyForDisplayKeyPath];
     _playerLayer = nil;
+}
+
+- (void)triggerGetCurrentPosition {
+    float current = [self getCurrentTime];
+    CMTime playerDuration = [self playerItemDuration];
+    if (CMTIME_IS_INVALID(playerDuration)) {
+        return;
+    }
+    CMTime currentTime = _player.currentTime;
+    const Float64 duration = CMTimeGetSeconds(playerDuration);
+    
+    [_eventDispatcher sendInputEventWithName:@"onGetPositionRequested"
+                                        body:@{
+                                               @"target": self.reactTag,
+                                               @"currentTime": @(current),
+                                               @"playableDuration": [NSNumber numberWithFloat:duration]
+                                               }];
 }
 
 #pragma mark - RCTVideoPlayerViewControllerDelegate

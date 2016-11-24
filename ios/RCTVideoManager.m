@@ -1,7 +1,9 @@
 #import "RCTVideoManager.h"
 #import "RCTVideo.h"
+#import "RCTUIManager.h"
 #import "RCTBridge.h"
 #import <AVFoundation/AVFoundation.h>
+
 
 @implementation RCTVideoManager
 
@@ -11,7 +13,7 @@ RCT_EXPORT_MODULE();
 
 - (UIView *)view
 {
-  return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
+    return [[RCTVideo alloc] initWithEventDispatcher:self.bridge.eventDispatcher];
 }
 
 /* Should support: onLoadStart, onLoad, and onError to stay consistent with Image */
@@ -32,7 +34,8 @@ RCT_EXPORT_MODULE();
     @"onReadyForDisplay",
     @"onPlaybackStalled",
     @"onPlaybackResume",
-    @"onPlaybackRateChange"
+    @"onPlaybackRateChange",
+    @"onGetPositionRequested"
   ];
 }
 
@@ -55,6 +58,17 @@ RCT_EXPORT_VIEW_PROPERTY(seek, float);
 RCT_EXPORT_VIEW_PROPERTY(currentTime, float);
 RCT_EXPORT_VIEW_PROPERTY(fullscreen, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(progressUpdateInterval, float);
+
+RCT_EXPORT_METHOD(getCurrentPosition:(nonnull NSNumber *)reactTag) {
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTVideo *> *viewRegistry) {
+        RCTVideo *view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[RCTVideo class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting RCTVideo, got: %@", view);
+        } else {
+            [view triggerGetCurrentPosition];
+        }
+    }];
+}
 
 - (NSDictionary *)constantsToExport
 {
